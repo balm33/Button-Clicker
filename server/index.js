@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const admin = require("firebase-admin");
+const { getFirestore } = require("firebase-admin/firestore");
 
 // firebase service account key
 const serviceAccount = require("./button-clicker-3af86-firebase-adminsdk-fbsvc-a72d5fad4c.json");
@@ -10,6 +11,7 @@ admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
 });
 
+const db = getFirestore();
 const app = express();
 const PORT = process.env.PORT || 8080;
 
@@ -53,6 +55,20 @@ app.get("/api/user_info", decodeToken, (req, res) => {
     uid: req.user.uid,
     email: req.user.email,
   });
+});
+
+// increment clicks
+app.post("/click", async (req, res) => {
+  const { uid } = req.body;
+  const ref = db.collection("clicks").doc(uid);
+
+  await db.runTransaction(async (t) => {
+    const snap = await t.get(ref);
+    const newCount = snap.exists ? snap.data().count + 1 : 1;
+    t.set(ref, { count: newCount });
+  });
+
+  res.json({ success: true });
 });
 
 // start server
