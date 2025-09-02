@@ -82,10 +82,28 @@ const Navbar = ({ setCurrentPage, isAuth }) => {
 const HomePage = ({ isAuth }) => {
   const [clickCount, setClickCount] = useState(0);
 
+  // load saved clicks when signed in
+  useEffect(() => {
+    const loadClicks = async () => {
+      if (auth.currentUser) {
+        try {
+          const res = await fetch(
+            `${import.meta.env.VITE_BACKEND_URL}/click/${auth.currentUser.uid}`
+          );
+          const data = await res.json();
+          setClickCount(data.count);
+        } catch (error) {
+          console.error("Error loading clicks", error);
+        }
+      }
+    };
+    loadClicks();
+  }, []);
+
   const handleClick = async () => {
     setClickCount(clickCount + 1);
 
-    await fetch("/click", {
+    await fetch(`${import.meta.env.VITE_BACKEND_URL}/click`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ uid: auth.currentUser.uid }),
@@ -99,7 +117,7 @@ const HomePage = ({ isAuth }) => {
         <>
           <div className="click-counter">
             <p className="click-display">Clicks: {clickCount}</p>
-            <button onClick={() => handleClick} className="click-button">
+            <button onClick={() => handleClick()} className="click-button">
               Click Me!
             </button>
           </div>
