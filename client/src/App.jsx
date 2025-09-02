@@ -82,6 +82,16 @@ const Navbar = ({ setCurrentPage, isAuth }) => {
 const HomePage = ({ isAuth }) => {
   const [clickCount, setClickCount] = useState(0);
 
+  const handleClick = async () => {
+    setClickCount(clickCount + 1);
+
+    await fetch("/click", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ uid: auth.currentUser.uid }),
+    });
+  };
+
   return (
     <div className="home-page-container">
       <h2 className="page-title">Click the Button!</h2>
@@ -89,10 +99,7 @@ const HomePage = ({ isAuth }) => {
         <>
           <div className="click-counter">
             <p className="click-display">Clicks: {clickCount}</p>
-            <button
-              onClick={() => setClickCount(clickCount + 1)}
-              className="click-button"
-            >
+            <button onClick={() => handleClick} className="click-button">
               Click Me!
             </button>
           </div>
