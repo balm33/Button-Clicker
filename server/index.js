@@ -18,3 +18,46 @@ app.use(express.json());
 
 //middleware to connect backend to frontend
 app.use(cors({ origin: true }));
+
+// middleware to verify firebase token on protected routes
+async function decodeToken(req, res, next) {
+  if (
+    !req.headers.authorization ||
+    !req.headers.authorization.startsWith("Bearer ")
+  ) {
+    return res.status(401).json({ error: "Unauthorized: No token provided!" });
+  }
+
+  const idToken = req.headers.authorization.split("Bearer")[1];
+
+  try {
+    const decodedToken = await admin.auth().verifyIdToken(idToken);
+    req.user = decodedToken; // add decoded token to request
+    next();
+  } catch (error) {
+    console.error("Error verifying Firebase ID token:", error);
+    return res.status(401).json({ error: "Unauthorized: Invalid token" });
+  }
+}
+
+// public api route (server status)
+app.get("/api/status", (req, res) => {
+  res.status(200).json({ message: "Server is running!" });
+});
+
+// protected api route
+// endpoint only accessible if FIrebase ID token is valid
+app.get("/api/user_info", decodeToken, (req, res) => {
+  res.status(200).json({
+    message: "User info retrieved successfully!",
+    uid: req.user.uid,
+    email: req.user.email,
+  });
+});
+
+// start server
+app.listen(PORT, () => {
+  console.log(`Server listening on port ${PORT}`);
+});
+
+module.exports = app;
