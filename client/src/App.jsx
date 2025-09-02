@@ -85,7 +85,7 @@ const HomePage = ({ isAuth }) => {
   const handleClick = async () => {
     setClickCount(clickCount + 1);
 
-    await fetch("/click", {
+    await fetch(`${import.meta.env.VITE_BACKEND_URL}/click`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ uid: auth.currentUser.uid }),
@@ -99,7 +99,7 @@ const HomePage = ({ isAuth }) => {
         <>
           <div className="click-counter">
             <p className="click-display">Clicks: {clickCount}</p>
-            <button onClick={() => handleClick} className="click-button">
+            <button onClick={() => handleClick()} className="click-button">
               Click Me!
             </button>
           </div>
