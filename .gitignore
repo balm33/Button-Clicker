@@ -1,0 +1,11 @@
+# dependencies
+client/node_modules
+client/dist
+server/node_modules
+
+# misc
+.env
+.DS_STORE
+.vscode/
+.venv
+.git
