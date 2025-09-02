@@ -71,6 +71,24 @@ app.post("/click", async (req, res) => {
   res.json({ success: true });
 });
 
+// get current clicks from database
+app.get("/click/:uid", async (req, res) => {
+  try {
+    const { uid } = req.params;
+    const ref = db.collection("clicks").doc(uid);
+    const doc = await ref.get();
+
+    if (!doc.exists) {
+      return res.json({ count: 0 });
+    }
+
+    res.json({ count: doc.data().count });
+  } catch (error) {
+    console.error("Error fetching click count:", error);
+    res.status(500).json({ error: "Failed to fetch click count" });
+  }
+});
+
 // start server
 app.listen(PORT, () => {
   console.log(`Server listening on port ${PORT}`);
